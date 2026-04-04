@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 Sci-Fi Empfehlungen</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0e1a; --bg2: #111827; --card: #1a2234;
+  --accent: #6366f1; --accent2: #8b5cf6; --text: #e2e8f0;
+  --dim: #94a3b8; --border: #2d3a4f; --green: #22c55e;
+  --green-soft: rgba(34, 197, 94, 0.14); --blue-soft: rgba(99, 102, 241, 0.12);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+/* Hero */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 4rem 1.5rem 2rem;
+  background: linear-gradient(180deg, #1e1b4b 0%, var(--bg) 100%);
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 75% 45%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 20% 85%, rgba(255,255,255,0.3), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity:.5 } to { opacity:1 } }
+.hero h1 { font-size: 2.5rem; margin-bottom: 0.3rem; position: relative; }
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent), var(--accent2), #ec4899);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero p { color: var(--dim); font-size: 1.05rem; position: relative; max-width: 600px; margin: 0 auto; }
+
+/* Stats */
+.stats {
+  display: flex; gap: 1rem; justify-content: center;
+  flex-wrap: wrap; margin-top: 2rem; position: relative;
+}
+.stats .stat {
+  background: var(--bg2); padding: 0.5rem 1.2rem;
+  border-radius: 10px; font-size: 0.85rem;
+  border: 1px solid var(--border); min-width: 90px;
+}
+.stats .stat strong { font-size: 1.4rem; display: block; color: var(--accent); }
+
+/* Reading tools */
+.reading-tools {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1.5rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  position: relative;
+}
+.tool-card {
+  background: linear-gradient(180deg, rgba(26, 34, 52, 0.98), rgba(16, 22, 35, 0.98));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.1rem 1.1rem 1rem;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+.tool-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.35rem; }
+.tool-head h2 { font-size: 1.1rem; }
+.tool-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.22rem 0.7rem; border-radius: 999px;
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.03em;
+  background: var(--blue-soft); color: #b6befd; border: 1px solid rgba(99,102,241,0.18);
+  white-space: nowrap;
+}
+.tool-card p { color: var(--dim); font-size: 0.92rem; margin-bottom: 0.9rem; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.9rem; }
+.preset-btn, .timer-btn {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.preset-btn:hover, .timer-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+.preset-btn.active { background: var(--accent); border-color: var(--accent); }
+.timer-display {
+  display: grid;
+  gap: 0.15rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.10), rgba(139,92,246,0.08));
+  border: 1px solid rgba(99,102,241,0.18);
+  margin-bottom: 0.9rem;
+}
+.timer-remaining { font-size: 2.4rem; line-height: 1; font-weight: 800; letter-spacing: -0.03em; }
+.timer-meta { color: var(--dim); font-size: 0.88rem; }
+.timer-controls { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.timer-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+  color: #fff;
+}
+.timer-btn.success { background: var(--green-soft); color: #8ff0b0; border-color: rgba(34,197,94,0.2); }
+.timer-btn.danger { background: rgba(239, 68, 68, 0.12); color: #ffb3b3; border-color: rgba(239,68,68,0.18); }
+.inline-label { display: grid; gap: 0.35rem; font-size: 0.85rem; color: var(--dim); margin-bottom: 0.85rem; }
+.inline-label input {
+  width: 100%; padding: 0.75rem 0.85rem;
+  border-radius: 12px; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text); font-size: 1rem; outline: none;
+}
+.inline-label input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.pace-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 0.85rem;
+}
+.pace-stats .pace-stat {
+  background: rgba(17, 24, 39, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.75rem 0.7rem;
+  text-align: center;
+}
+.pace-stats .pace-stat strong { display: block; color: var(--accent); font-size: 1.15rem; }
+.pace-stats .pace-stat span { display: block; color: var(--dim); font-size: 0.76rem; margin-top: 0.15rem; }
+.session-list { display: grid; gap: 0.45rem; }
+.session-item {
+  display: flex; justify-content: space-between; gap: 0.75rem; align-items: center;
+  padding: 0.68rem 0.75rem; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02); border-radius: 12px; font-size: 0.84rem;
+}
+.session-item .muted { color: var(--dim); font-size: 0.8rem; }
+.session-note { min-height: 1.2em; color: #b9c4ff; font-size: 0.84rem; margin-top: 0.25rem; }
+
+/* Search */
+.search-wrap { max-width: 440px; margin: 1rem auto 0; position: relative; }
+.search-wrap input {
+  width: 100%; padding: 0.85rem 1rem 0.85rem 2.6rem;
+  border-radius: 999px; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text);
+  font-size: 1rem; outline: none; transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.search-wrap::before {
+  content: '🔍'; position: absolute; left: 1rem; top: 50%;
+  transform: translateY(-50%); font-size: 1rem;
+}
+
+/* Genre Filter */
+.filters {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  justify-content: center; margin: 1.3rem 1.5rem 1rem;
+}
+.filters button {
+  padding: 0.45rem 0.9rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--bg2);
+  color: var(--dim); font-size: 0.85rem; cursor: pointer;
+  transition: all 0.2s;
+}
+.filters button:hover { border-color: var(--accent); color: var(--text); }
+.filters button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Section Labels */
+.section-label {
+  text-align: center; margin: 2rem 0 1rem;
+  font-size: 1.4rem; font-weight: 600;
+}
+.section-label .emoji { margin-right: 0.4rem; }
+
+/* Grid */
+.grid {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 3rem;
+}
+
+/* Card */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.3rem 1.4rem;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+  position: relative;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+.card.hidden { display: none; }
+
+.badge {
+  display: inline-block; font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem; border-radius: 999px;
+  background: rgba(99,102,241,0.18); color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.card h3 { font-size: 1.1rem; margin-bottom: 0.15rem; }
+.card .author { color: var(--accent2); font-size: 0.85rem; margin-bottom: 0.45rem; }
+.card .pitch { color: var(--dim); font-size: 0.88rem; line-height: 1.5; }
+
+.card .meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 0.75rem; padding-top: 0.75rem;
+  border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--dim);
+}
+.difficulty { color: #fbbf24; letter-spacing: 1px; }
+
+/* Top-Pick */
+.card.top {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), var(--card));
+}
+.card.top::after {
+  position: absolute; top: -9px; right: 12px;
+  font-size: 0.6rem; background: var(--accent);
+  color: #fff; padding: 3px 10px; border-radius: 999px;
+  font-weight: 700; letter-spacing: 0.05em;
+}
+.card.top:nth-of-type(1):after { content: '🥇 #1'; }
+.card.top:nth-of-type(2):after { content: '🥈 #2'; }
+.card.top:nth-of-type(3):after { content: '🥉 #3'; }
+
+/* No results */
+.no-results {
+  text-align: center; padding: 3rem 1rem;
+  color: var(--dim); grid-column: 1 / -1;
+}
+.no-results .big { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+footer {
+  text-align: center; padding: 2rem 1rem 1.5rem;
+  color: var(--dim); font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 700px) {
+  .hero { padding-top: 3.2rem; }
+  .hero h1 { font-size: 2rem; }
+  .timer-remaining { font-size: 2rem; }
+  .pace-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🚀 <span>Sci-Fi Empfehlungen</span></h1>
+  <p>Kuratierte Buchempfehlungen für Hendrik — 25 Titel, sortiert nach Genre und Schwierigkeit. Jetzt mit Fokus-Timer und Lesepace-Tracker.</p>
+  <div class="stats">
+    <div class="stat"><strong>25</strong>Bücher</div>
+    <div class="stat"><strong>7</strong>Genres</div>
+    <div class="stat"><strong>4</strong>Deutsch</div>
+  </div>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Titel, Autor oder Genre suchen..." autocomplete="off">
+  </div>
+</div>
+
+<div class="reading-tools">
+  <div class="tool-card">
+    <div class="tool-head">
+      <h2>📚 Reading Timer</h2>
+      <span class="tool-chip" id="timerChip">25 min Fokus</span>
+    </div>
+    <p>Kürzere Sessions sind leichter zu starten. Wähle eine Dauer, fokussiere dich und logge danach deinen Leseblock.</p>
+    <div class="preset-row" id="presetRow">
+      <button class="preset-btn active" data-minutes="15">15 min</button>
+      <button class="preset-btn" data-minutes="25">25 min</button>
+      <button class="preset-btn" data-minutes="45">45 min</button>
+      <button class="preset-btn" data-minutes="60">60 min</button>
+    </div>
+    <div class="timer-display">
+      <div class="timer-remaining" id="timerRemaining">25:00</div>
+      <div class="timer-meta" id="timerMeta">0:00 erledigt · Ziel 25:00</div>
+    </div>
+    <div class="timer-controls">
+      <button class="timer-btn primary" id="timerToggle">Start</button>
+      <button class="timer-btn" id="timerReset">Reset</button>
+      <button class="timer-btn success" id="timerLog">Session loggen</button>
+    </div>
+    <div class="session-note" id="sessionNote">Starte einen Fokusblock, wenn du bereit bist.</div>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-head">
+      <h2>📈 Pace Tracker</h2>
+      <span class="tool-chip">Heute</span>
+    </div>
+    <p>Optional Seiten eintragen — so bekommst du aus reiner Lesezeit echte Pace-Werte und nicht nur eine Uhr.</p>
+    <label class="inline-label">Seiten in dieser Session
+      <input type="number" id="sessionPages" min="0" step="1" placeholder="z. B. 32">
+    </label>
+    <div class="pace-stats">
+      <div class="pace-stat"><strong id="todayMinutes">0</strong><span>Minuten</span></div>
+      <div class="pace-stat"><strong id="todaySessions">0</strong><span>Sessions</span></div>
+      <div class="pace-stat"><strong id="todayPace">—</strong><span>Seiten / h</span></div>
+    </div>
+    <div class="session-list" id="recentSessions">
+      <div class="session-item"><span class="muted">Noch keine Sessions geloggt.</span><span>🛰️</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="filters" id="filters"></div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  Erstellt am 02.04.2026 · Stand: 25 Titel · Rating-Spalte zum Selbst-Ausfüllen 🦞
+</footer>
+
+<script>
+const BOOKS = [
+  // TOP PICKS
+  {title:"Blindsight",author:"Peter Watts",year:2006,genre:"Hard Sci-Fi",difficulty:4,pitch:"Bewusstsein vs. Intelligenz — die Aliens sind SUPER-intelligent aber NICHT bewusst. Harte Neurowissenschaft trifft gruseligsten First Contact ever.",top:1},
+  {title:"The Three-Body Problem",author:"Cixin Liu",year:2008,genre:"Hard Sci-Fi",difficulty:3,pitch:"First Contact während der chinesischen Kulturrevolution. Physik wird zur Waffe. Dreikörperproblem als Plot-Device.",top:2},
+  {title:"Diaspora",author:"Greg Egan",year:1997,genre:"Hard Sci-Fi",difficulty:5,pitch:"Mathematik IST Physik. Digitale Wesen explorieren das Multiversum. TOE als Plot. Maximal harte Sci-Fi.",top:3},
+  // Hard Sci-Fi
+  {title:"Children of Time",author:"Adrian Tchaikovsky",year:2015,genre:"Hard Sci-Fi",difficulty:3,pitch:"Spinnen entwickeln Zivilisation über Jahrtausende. Evolutionäre Sci-Fi. Hugo-Gewinner."},
+  {title:"Dragon's Egg",author:"Robert L. Forward",year:1980,genre:"Hard Sci-Fi",difficulty:5,pitch:"Zivilisation auf Neutronenstern — 1000 Jahre = 1 Sekunde. Harte Physik!"},
+  {title:"The Martian",author:"Andy Weir",year:2011,genre:"Hard Sci-Fi",difficulty:2,pitch:"Mars-Überleben mit echter Wissenschaft. Problem nach Problem. Optimistisch."},
+  {title:"Project Hail Mary",author:"Andy Weir",year:2021,genre:"Hard Sci-Fi",difficulty:3,pitch:"Allein im All, Physik rettet alles. Alien-Freundschaft. Optimistisch."},
+  // Philosophisch
+  {title:"Story of Your Life",author:"Ted Chiang",year:1998,genre:"Philosophisch",difficulty:3,pitch:"Deterministische Zeitsicht. Ankunft der Aliens. Filmvorlage für 'Arrival'."},
+  {title:"Exhalation",author:"Ted Chiang",year:2019,genre:"Philosophisch",difficulty:3,pitch:"9 Gedanken-Experimente: Thermodynamik, KI, Determinismus. Perfekt zwischendurch."},
+  {title:"The Left Hand of Darkness",author:"Ursula K. Le Guin",year:1969,genre:"Philosophisch",difficulty:3,pitch:"Geschlechtslose Gesellschaft auf Eis. Anthropologie. Hugo + Nebula."},
+  {title:"Piranesi",author:"Susanna Clarke",year:2020,genre:"Philosophisch",difficulty:2,pitch:"Unendliches Haus, Identitätsverlust. Ist Realität echt? Mystery."},
+  // Space Opera
+  {title:"Hyperion",author:"Dan Simmons",year:1989,genre:"Space Opera",difficulty:4,pitch:"Canterbury Tales im Weltraum. Shrike, Zeitgräber. Literarisch anspruchsvoll."},
+  {title:"Old Man's War",author:"John Scalzi",year:2005,genre:"Space Opera",difficulty:2,pitch:"Omas im All mit neuen Körpern. Militärische Sci-Fi mit Humor."},
+  {title:"The Long Way to a Small Angry Planet",author:"Becky Chambers",year:2014,genre:"Space Opera",difficulty:1,pitch:"Cozy Found Family auf Raumschiff. Warmherzig. Perfekt zum Runterkommen."},
+  {title:"Leviathan Wakes",author:"James S.A. Corey",year:2011,genre:"Space Opera",difficulty:3,pitch:"Political Thriller im Sonnensystem. Realistische Raumfahrt. Serien-Vorlage."},
+  {title:"A Fire Upon the Deep",author:"Vernor Vinge",year:1992,genre:"Space Opera",difficulty:4,pitch:"Zonen des Denkens. Superintelligente Wesen. Hunderte Lichtjahre Scope."},
+  {title:"Ancillary Justice",author:"Ann Leckie",year:2013,genre:"Space Opera",difficulty:3,pitch:"KI-Kriegsschiff in einem Menschenkörper. Gender ist irrelevant. Triple-Gewinner."},
+  // Thriller
+  {title:"Dark Matter",author:"Blake Crouch",year:2016,genre:"Thriller",difficulty:2,pitch:"Multiverse-Page-Turner. Was wäre wenn du ein anderes Leben gewählt hättest?"},
+  {title:"All Systems Red",author:"Martha Wells",year:2017,genre:"Thriller",difficulty:2,pitch:"Security-Android der lieber Serien guckt als Menschen hilft. Lustig UND tief."},
+  {title:"Der Schwarm",author:"Frank Schätzing",year:2004,genre:"Thriller",difficulty:2,pitch:"Ozean wehrt sich mit Swarm-Intelligenz. Techno-Thriller mit echter Wissenschaft."},
+  {title:"The City & The City",author:"China Miéville",year:2009,genre:"Thriller",difficulty:3,pitch:"Zwei Städte am selben Ort die man NICHT sehen darf. Polizei-Thriller + Metaphysik."},
+  // Deutsch
+  {title:"QualityLand",author:"Marc-Uwe Kling",year:2017,genre:"Deutsch",difficulty:2,pitch:"Algorithmus-Diktatur: 'Du willst nicht aber dein Algorithmus schon'."},
+  {title:"Die Wolke",author:"Gudrun Pausewang",year:1987,genre:"Deutsch",difficulty:1,pitch:"Reaktorunfall in Deutschland. Jugendsachbuch das Albträume macht."},
+  // Bonus
+  {title:"Illuminae",author:"Amie Kaufman",year:2015,genre:"Format-Experiment",difficulty:2,pitch:"Akten, Chats, Bilder als Erzählform. AI geht durch. Space-Action."},
+  {title:"House of Leaves",author:"Mark Z. Danielewski",year:2000,genre:"Format-Experiment",difficulty:4,pitch:"Das Haus ist größer innen als außen. Typografischer Albtraum. Meta-Mystery."},
+];
+
+// Render filters
+const genres = ['Alle', ...new Set(BOOKS.map(b => b.genre))];
+const filtersEl = document.getElementById('filters');
+genres.forEach(g => {
+  const btn = document.createElement('button');
+  btn.textContent = g;
+  btn.dataset.genre = g;
+  btn.addEventListener('click', () => {
+    filtersEl.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  });
+  filtersEl.appendChild(btn);
+});
+filtersEl.querySelector('button').classList.add('active');
+
+function stars(n) { return '⭐'.repeat(n); }
+
+const grid = document.getElementById('grid');
+BOOKS.forEach(b => {
+  const card = document.createElement('div');
+  card.className = 'card' + (b.top ? ' top' : '');
+  card.dataset.genre = b.genre;
+  card.dataset.search = (b.title + ' ' + b.author + ' ' + b.genre).toLowerCase();
+  card.innerHTML = `
+    <span class="badge">${b.genre}</span>
+    <h3>${b.title}</h3>
+    <div class="author">${b.author}, ${b.year}</div>
+    <div class="pitch">${b.pitch}</div>
+    <div class="meta">
+      <span class="difficulty">${stars(b.difficulty)}</span>
+      <span class="year">${b.year}</span>
+    </div>`;
+  grid.appendChild(card);
+});
+
+// Search + filter
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', applyFilters);
+
+function applyFilters() {
+  const q = searchInput.value.toLowerCase().trim();
+  const genre = filtersEl.querySelector('button.active')?.dataset.genre || 'Alle';
+  let visible = 0;
+
+  grid.querySelectorAll('.card').forEach(card => {
+    const matchGenre = genre === 'Alle' || card.dataset.genre === genre;
+    const matchSearch = !q || card.dataset.search.includes(q);
+    const show = matchGenre && matchSearch;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  let noRes = grid.querySelector('.no-results');
+  if (visible === 0) {
+    if (!noRes) {
+      noRes = document.createElement('div');
+      noRes.className = 'no-results';
+      noRes.innerHTML = '<div class="big">🔭</div><div>Keine Bücher gefunden.</div>';
+      grid.appendChild(noRes);
+    }
+  } else if (noRes) {
+    noRes.remove();
+  }
+}
+
+// Reading timer / pace tracker
+const LOG_KEY = 'sci-fi-reading-log-v2';
+const timer = {
+  targetSec: 25 * 60,
+  elapsedSec: 0,
+  running: false,
+  startedAt: 0,
+  intervalId: null
+};
+
+const timerRemainingEl = document.getElementById('timerRemaining');
+const timerMetaEl = document.getElementById('timerMeta');
+const timerChipEl = document.getElementById('timerChip');
+const timerToggleBtn = document.getElementById('timerToggle');
+const timerResetBtn = document.getElementById('timerReset');
+const timerLogBtn = document.getElementById('timerLog');
+const presetRow = document.getElementById('presetRow');
+const sessionPagesEl = document.getElementById('sessionPages');
+const todayMinutesEl = document.getElementById('todayMinutes');
+const todaySessionsEl = document.getElementById('todaySessions');
+const todayPaceEl = document.getElementById('todayPace');
+const recentSessionsEl = document.getElementById('recentSessions');
+const sessionNoteEl = document.getElementById('sessionNote');
+
+function localDateKey(date) {
+  const d = date || new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function safeReadLogs() {
+  try {
+    const raw = localStorage.getItem(LOG_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function safeWriteLogs(logs) {
+  try {
+    localStorage.setItem(LOG_KEY, JSON.stringify(logs.slice(-200)));
+  } catch (err) {
+    // ignore storage failures
+  }
+}
+
+function formatDuration(totalSec) {
+  const sec = Math.max(0, Math.floor(totalSec));
+  const mins = Math.floor(sec / 60);
+  const secs = sec % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
+function formatLongMinutes(totalSec) {
+  const minutes = totalSec / 60;
+  return minutes % 1 === 0 ? String(minutes) : minutes.toFixed(1);
+}
+
+function syncElapsed() {
+  if (!timer.running) return;
+  timer.elapsedSec = Math.min(timer.targetSec, Math.floor((Date.now() - timer.startedAt) / 1000));
+}
+
+function getTodayLogs() {
+  const today = localDateKey();
+  return safeReadLogs().filter(entry => entry.date === today);
+}
+
+function renderTimer() {
+  syncElapsed();
+  timerRemainingEl.textContent = formatDuration(Math.max(timer.targetSec - timer.elapsedSec, 0));
+  timerMetaEl.textContent = `${formatDuration(timer.elapsedSec)} erledigt · Ziel ${formatDuration(timer.targetSec)}`;
+  timerChipEl.textContent = `${Math.round(timer.targetSec / 60)} min ${timer.running ? 'läuft' : 'Fokus'}`;
+  timerToggleBtn.textContent = timer.running ? 'Pause' : 'Start';
+  timerToggleBtn.classList.toggle('primary', !timer.running);
+  timerToggleBtn.classList.toggle('danger', timer.running);
+  if (timer.elapsedSec >= timer.targetSec && timer.targetSec > 0) {
+    sessionNoteEl.textContent = 'Ziel erreicht — logge die Session oder starte direkt den nächsten Block.';
+  } else if (timer.running) {
+    sessionNoteEl.textContent = 'Konzentriert lesen — der Timer läuft.';
+  } else if (timer.elapsedSec > 0) {
+    sessionNoteEl.textContent = 'Session pausiert. Du kannst jetzt loggen oder weiterlaufen lassen.';
+  } else {
+    sessionNoteEl.textContent = 'Starte einen Fokusblock, wenn du bereit bist.';
+  }
+}
+
+function updatePaceStats() {
+  const logs = getTodayLogs();
+  const totalSec = logs.reduce((sum, entry) => sum + (entry.durationSec || 0), 0);
+  const totalPages = logs.reduce((sum, entry) => sum + (entry.pages || 0), 0);
+  const minutes = Math.round(totalSec / 60);
+  const pace = totalPages > 0 && totalSec > 0 ? Math.round((totalPages / totalSec) * 3600) : null;
+
+  todayMinutesEl.textContent = String(minutes);
+  todaySessionsEl.textContent = String(logs.length);
+  todayPaceEl.textContent = pace ? String(pace) : '—';
+
+  if (logs.length === 0) {
+    recentSessionsEl.innerHTML = '<div class="session-item"><span class="muted">Noch keine Sessions geloggt.</span><span>🛰️</span></div>';
+    return;
+  }
+
+  const recent = logs.slice(-3).reverse();
+  recentSessionsEl.innerHTML = recent.map(entry => {
+    const when = new Date(entry.ts || Date.now()).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const pages = entry.pages ? `${entry.pages} Seiten` : 'ohne Seitenangabe';
+    const paceLabel = entry.pages && entry.durationSec ? `${Math.round((entry.pages / entry.durationSec) * 3600)} p/h` : '—';
+    return `
+      <div class="session-item">
+        <div>
+          <div>${formatLongMinutes(entry.durationSec || 0)} min · ${pages}</div>
+          <div class="muted">${when} · Ziel ${Math.round((entry.targetSec || timer.targetSec) / 60)} min · ${paceLabel}</div>
+        </div>
+        <span>📘</span>
+      </div>`;
+  }).join('');
+}
+
+function setPreset(minutes) {
+  timer.targetSec = minutes * 60;
+  timer.elapsedSec = 0;
+  timer.running = false;
+  timer.startedAt = 0;
+  clearInterval(timer.intervalId);
+  timer.intervalId = null;
+  presetRow.querySelectorAll('.preset-btn').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) === minutes));
+  renderTimer();
+}
+
+function startTimer() {
+  if (timer.running) return;
+  if (timer.elapsedSec >= timer.targetSec) timer.elapsedSec = 0;
+  timer.running = true;
+  timer.startedAt = Date.now() - (timer.elapsedSec * 1000);
+  timer.intervalId = setInterval(() => {
+    syncElapsed();
+    if (timer.elapsedSec >= timer.targetSec) {
+      timer.running = false;
+      clearInterval(timer.intervalId);
+      timer.intervalId = null;
+      timer.elapsedSec = timer.targetSec;
+    }
+    renderTimer();
+  }, 1000);
+  renderTimer();
+}
+
+function pauseTimer() {
+  if (!timer.running) return;
+  syncElapsed();
+  timer.running = false;
+  clearInterval(timer.intervalId);
+  timer.intervalId = null;
+  renderTimer();
+}
+
+function resetTimer() {
+  timer.running = false;
+  timer.elapsedSec = 0;
+  timer.startedAt = 0;
+  clearInterval(timer.intervalId);
+  timer.intervalId = null;
+  renderTimer();
+}
+
+function logSession() {
+  syncElapsed();
+  const durationSec = timer.elapsedSec;
+  if (durationSec < 30) {
+    sessionNoteEl.textContent = 'Mindestens 30 Sekunden lesen, dann lohnt sich der Logeintrag mehr.';
+    return;
+  }
+
+  const rawPages = parseInt(sessionPagesEl.value, 10);
+  const pages = Number.isFinite(rawPages) && rawPages > 0 ? rawPages : 0;
+  const logs = safeReadLogs();
+  logs.push({
+    date: localDateKey(),
+    ts: Date.now(),
+    durationSec,
+    pages,
+    targetSec: timer.targetSec
+  });
+  safeWriteLogs(logs);
+
+  sessionPagesEl.value = '';
+  resetTimer();
+  updatePaceStats();
+  sessionNoteEl.textContent = `Gespeichert: ${formatDuration(durationSec)}${pages ? ` · ${pages} Seiten` : ''}.`;
+}
+
+presetRow.addEventListener('click', event => {
+  const button = event.target.closest('.preset-btn');
+  if (!button) return;
+  setPreset(Number(button.dataset.minutes));
+});
+
+timerToggleBtn.addEventListener('click', () => {
+  if (timer.running) pauseTimer(); else startTimer();
+});
+timerResetBtn.addEventListener('click', resetTimer);
+timerLogBtn.addEventListener('click', logSession);
+
+setPreset(25);
+renderTimer();
+updatePaceStats();
+
+// Ensure the timer display stays in sync if localStorage or tabs change
+window.addEventListener('storage', () => updatePaceStats());
+</script>
+</body>
+</html>
