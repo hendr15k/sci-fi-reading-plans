@@ -145,6 +145,26 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .session-item .muted { color: var(--dim); font-size: 0.8rem; }
 .session-note { min-height: 1.2em; color: #b9c4ff; font-size: 0.84rem; margin-top: 0.25rem; }
 
+/* Book log row */
+.book-log-row {
+  display: flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.5rem; padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+.book-log-label { color: var(--dim); font-size: 0.8rem; }
+.book-log-name {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: 0.82rem; color: #c4b5fd;
+  flex: 1;
+}
+.book-log-pick-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--dim); border-radius: 999px;
+  font-size: 0.7rem; padding: 0.1rem 0.35rem; cursor: pointer;
+  transition: all 0.15s; line-height: 1;
+}
+.book-log-pick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 /* Search */
 .search-wrap { max-width: 440px; margin: 1rem auto 0; position: relative; }
 .search-wrap input {
@@ -388,6 +408,12 @@ BOOKS.forEach(b => {
     <div class="meta">
       <span class="difficulty">${stars(b.difficulty)}</span>
       <span class="year">${b.year}</span>
+    </div>
+    <div class="book-log-row">
+      <span class="book-log-label">📖</span>
+      <span class="book-log-name" id="lastBookDisplay">${getLastBookTitle() || 'Kein Buch ausgewaehlt'}
+        <button class="book-log-pick-btn" id="pickBookBtn" title="Buch auswaehlen">✏️</button>
+      </span>
     </div>`;
   grid.appendChild(card);
 });
@@ -424,6 +450,7 @@ function applyFilters() {
 
 // Reading timer / pace tracker
 const LOG_KEY = 'sci-fi-reading-log-v2';
+const LAST_BOOK_KEY = 'sci-fi-last-book-v1';
 const timer = {
   targetSec: 25 * 60,
   elapsedSec: 0,
@@ -431,6 +458,13 @@ const timer = {
   startedAt: 0,
   intervalId: null
 };
+
+function getLastBookTitle() {
+  try { return localStorage.getItem(LAST_BOOK_KEY) || ''; } catch { return ''; }
+}
+function setLastBookTitle(title) {
+  try { localStorage.setItem(LAST_BOOK_KEY, title); } catch {}
+}
 
 const timerRemainingEl = document.getElementById('timerRemaining');
 const timerMetaEl = document.getElementById('timerMeta');
@@ -531,16 +565,10 @@ function updatePaceStats() {
   const recent = logs.slice(-3).reverse();
   recentSessionsEl.innerHTML = recent.map(entry => {
     const when = new Date(entry.ts || Date.now()).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-    const pages = entry.pages ? `${entry.pages} Seiten` : 'ohne Seitenangabe';
-    const paceLabel = entry.pages && entry.durationSec ? `${Math.round((entry.pages / entry.durationSec) * 3600)} p/h` : '—';
-    return `
-      <div class="session-item">
-        <div>
-          <div>${formatLongMinutes(entry.durationSec || 0)} min · ${pages}</div>
-          <div class="muted">${when} · Ziel ${Math.round((entry.targetSec || timer.targetSec) / 60)} min · ${paceLabel}</div>
-        </div>
-        <span>📘</span>
-      </div>`;
+    const pages = entry.pages ? entry.pages + ' Seiten' : 'ohne Seitenangabe';
+    const paceLabel = entry.pages && entry.durationSec ? Math.round((entry.pages / entry.durationSec) * 3600) + ' p/h' : '—';
+    const bookLabel = entry.book ? entry.book : null;
+    return '<div class="session-item"><div><div>' + formatLongMinutes(entry.durationSec || 0) + ' min · ' + pages + (bookLabel ? ' · ' + bookLabel : '') + '</div><div class="muted">' + when + ' · Ziel ' + Math.round((entry.targetSec || timer.targetSec) / 60) + ' min · ' + paceLabel + '</div></div><span>📘</span></div>';
   }).join('');
 }
 
@@ -607,14 +635,15 @@ function logSession() {
     ts: Date.now(),
     durationSec,
     pages,
-    targetSec: timer.targetSec
+    targetSec: timer.targetSec,
+    book: getLastBookTitle()
   });
   safeWriteLogs(logs);
 
   sessionPagesEl.value = '';
   resetTimer();
   updatePaceStats();
-  sessionNoteEl.textContent = `Gespeichert: ${formatDuration(durationSec)}${pages ? ` · ${pages} Seiten` : ''}.`;
+  sessionNoteEl.textContent = 'Gespeichert: ' + formatDuration(durationSec) + (pages ? ' · ' + pages + ' Seiten' : '') + (getLastBookTitle() ? ' · 📖 ' + getLastBookTitle() : '') + '.';
 }
 
 presetRow.addEventListener('click', event => {
@@ -633,6 +662,62 @@ setPreset(25);
 renderTimer();
 updatePaceStats();
 
+// Book-in-session: wire up pick button after DOM is ready
+function updateLastBookDisplay() {
+  const lastBook = getLastBookTitle();
+  const lastBookDisplay = document.getElementById('lastBookDisplay');
+  if (lastBookDisplay && lastBookDisplay.childNodes[0]) {
+    lastBookDisplay.childNodes[0].textContent = lastBook || 'Kein Buch ausgewaehlt';
+  }
+}
+function openBookPicker() {
+  const existing = document.getElementById('bookPickerModal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'bookPickerModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+
+
+  var dialog = document.createElement('div');
+  dialog.style.cssText = 'background:#1a2234;border:1px solid #2d3a4f;border-radius:18px;padding:1.5rem;max-width:420px;width:100%;max-height:75vh;display:flex;flex-direction:column;gap:0.75rem;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+  dialog.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><h3 style="color:#e2e8f0;font-size:1.05rem;">📖 Buch auswaehlen</h3><button id="closePickerBtn" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;padding:0.25rem;">✕</button></div><input type="text" id="bookSearchInput" placeholder="Titel oder Autor suchen..." style="width:100%;padding:0.7rem 0.85rem;border-radius:12px;border:1px solid #2d3a4f;background:#111827;color:#e2e8f0;font-size:0.95rem;outline:none;" /><div id="bookListContainer" style="overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:0.4rem;"></div>';
+
+  modal.appendChild(dialog);
+  document.body.appendChild(modal);
+
+  var bookList = dialog.querySelector('#bookListContainer');
+  var searchInput = dialog.querySelector('#bookSearchInput');
+
+  function renderBookList(filter) {
+    filter = (filter || '').toLowerCase();
+    bookList.innerHTML = '';
+    BOOKS.forEach(function(b) {
+      if (filter && !(b.title + b.author).toLowerCase().includes(filter)) return;
+      var item = document.createElement('button');
+      item.style.cssText = 'display:flex;flex-direction:column;gap:0.15rem;align-items:flex-start;padding:0.65rem 0.85rem;border-radius:12px;border:1px solid #2d3a4f;background:#111827;color:#e2e8f0;cursor:pointer;text-align:left;transition:border-color 0.15s,background 0.15s;';
+      item.innerHTML = '<span style="font-size:0.9rem;font-weight:600;">' + b.title + '</span><span style="font-size:0.75rem;color:#94a3b8;">' + b.author + ' · ' + b.genre + '</span>';
+      item.addEventListener('mouseenter', function() { item.style.borderColor = '#6366f1'; item.style.background = '#1e2840'; });
+      item.addEventListener('mouseleave', function() { item.style.borderColor = '#2d3a4f'; item.style.background = '#111827'; });
+      item.addEventListener('click', function() {
+        setLastBookTitle(b.title);
+        updateLastBookDisplay();
+        sessionNoteEl.textContent = '📖 "' + b.title + '" — Session wird geloggt.';
+        modal.remove();
+      });
+      bookList.appendChild(item);
+    });
+  }
+
+  searchInput.addEventListener('input', function(e) { renderBookList(e.target.value); });
+  dialog.querySelector('#closePickerBtn').addEventListener('click', function() { modal.remove(); });
+  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+  renderBookList('');
+}
+
+var pickBtn = document.getElementById('pickBookBtn');
+if (pickBtn) pickBtn.addEventListener('click', openBookPicker);
+updateLastBookDisplay();
 // Ensure the timer display stays in sync if localStorage or tabs change
 window.addEventListener('storage', () => updatePaceStats());
 </script>
